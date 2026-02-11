@@ -1,0 +1,219 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>🎆 Chúc Mừng Năm Mới 🎆</title>
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: radial-gradient(circle at bottom, #020111, #000000);
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        /* CĂN GIỮA TUYỆT ĐỐI */
+        .center-text {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        /* CHỮ CHÍNH */
+        h1 {
+            font-size: 90px;
+            margin: 0;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            background: linear-gradient( 270deg, red, orange, yellow, lime, cyan, blue, magenta, red );
+            background-size: 1600% 1600%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: rainbow 6s linear infinite, float 3s ease-in-out infinite;
+            text-shadow: 0 0 20px rgba(255,255,255,0.9), 0 0 50px rgba(255,0,255,1);
+        }
+
+        /* LỜI CHÚC */
+        p {
+            margin-top: 30px;
+            font-size: 30px;
+            color: white;
+            line-height: 1.5;
+            text-shadow: 0 0 20px cyan;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        /* MÀN HÌNH BẬT NHẠC */
+        #startHint {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 32px;
+            z-index: 10;
+            cursor: pointer;
+            text-shadow: 0 0 20px cyan;
+        }
+
+        @keyframes rainbow {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 15px #fff, 0 0 30px cyan;
+            }
+
+            to {
+                text-shadow: 0 0 35px magenta, 0 0 60px yellow;
+            }
+        }
+
+        @keyframes float {
+            0%,100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NHẠC NỀN -->
+    <audio id="bgMusic" loop>
+        <source src="tet.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- MÀN CLICK BẬT NHẠC -->
+    <div id="startHint">
+        🎵 Nhạc lên nè!! 🎵
+    </div>
+
+    <canvas id="fireworks"></canvas>
+
+    <div class="center-text">
+        <h1>Chúc Mừng Năm Mới</h1>
+        <p>
+            🌸 Chúc bạn năm mới an khang – thịnh vượng<br>
+            💖 Sức khỏe dồi dào, vạn sự như ý<br>
+            🚀 Thành công bùng nổ rực rỡ như pháo hoa!
+        </p>
+    </div>
+
+    <script>
+        /* PHÁO HOA */
+        const canvas = document.getElementById("fireworks");
+        const ctx = canvas.getContext("2d");
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener("resize", resize);
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.z = Math.random() * 300;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 7 + 3;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.vz = Math.random() * 4 - 2;
+                this.life = 120;
+                this.color = color;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.z += this.vz;
+                this.vy += 0.04;
+                this.life--;
+            }
+
+            draw() {
+                const scale = 400 / (400 + this.z);
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, scale * 3.5, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        let particles = [];
+
+        function explode(x, y) {
+            const hue = Math.random() * 360;
+            const color = `hsl(${hue},100%,60%)`;
+            for (let i = 0; i < 220; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        function loop() {
+            ctx.fillStyle = "rgba(0,0,0,0.25)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles = particles.filter(p => p.life > 0);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            if (Math.random() < 0.06) {
+                explode(
+                    Math.random() * canvas.width,
+                    Math.random() * canvas.height * 0.6
+                );
+            }
+
+            requestAnimationFrame(loop);
+        }
+        loop();
+
+        /* BẬT NHẠC */
+        const music = document.getElementById("bgMusic");
+        const hint = document.getElementById("startHint");
+
+        hint.addEventListener("click", () => {
+            music.volume = 0.6;
+            music.play();
+            hint.style.display = "none";
+        });
+
+        /* CLICK NỔ PHÁO HOA */
+        document.addEventListener("click", e => {
+            explode(e.clientX, e.clientY);
+        });
+    </script>
+
+</body>
+</html>
