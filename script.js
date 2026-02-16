@@ -179,6 +179,22 @@ setInterval(() => {
     );
 }, 1000);
 
+/* ================= TYPEWRITER ================= */
+function typeWriter(el, speed) {
+    const text = el.innerHTML;
+    el.innerHTML = "";
+    el.classList.add("show");
+    let i = 0;
+    function typing() {
+        if (i < text.length) {
+            el.innerHTML += text.charAt(i);
+            i++;
+            setTimeout(typing, speed);
+        }
+    }
+    typing();
+}
+
 /* ================= NÚT LÌ XÌ ================= */
 function nhanLiXi() {
     document.getElementById("troll").style.display = "block";
@@ -189,3 +205,4 @@ function nhanLiXi() {
         music.play().catch(() => {});
     }
 }
+
