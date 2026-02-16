@@ -1,18 +1,17 @@
-const canvas = document.getElementById("fireworks");
+const canvas = document.getElementById("fireworks") || document.getElementById("bg");
 const ctx = canvas.getContext("2d");
-const title = document.getElementById("newYearText");
 
 /* ================= CANVAS ================= */
-function resize() {
+function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 }
-resize();
-window.addEventListener("resize", resize);
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
 
-/* ================= NỀN TRỜI ================= */
+/* ================= NỀN TRỜI (KHÔNG ĐEN ĐẶC) ================= */
 function drawSky() {
-    const g = ctx.createRadialGradient(
+    const grad = ctx.createRadialGradient(
         canvas.width / 2,
         canvas.height,
         0,
@@ -21,98 +20,121 @@ function drawSky() {
         canvas.height
     );
 
-    g.addColorStop(0, "#1c2f5a");
-    g.addColorStop(0.5, "#0b1030");
-    g.addColorStop(1, "#02010a");
+    grad.addColorStop(0, "#1b2b4f");
+    grad.addColorStop(0.5, "#0b0f2a");
+    grad.addColorStop(1, "#05010f");
 
-    ctx.fillStyle = g;
+    ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-/* ================= SAO RƠI ================= */
+/* ================= SAO TRỜI RƠI CHẬM ================= */
 class Star {
     constructor() {
         this.reset();
     }
+
     reset() {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
-        this.r = Math.random() * 1.6 + 0.4;
-        this.speed = Math.random() * 0.3 + 0.05;
-        this.a = Math.random() * 0.6 + 0.4;
+        this.r = Math.random() * 1.5 + 0.3;
+        this.speed = Math.random() * 0.3 + 0.1;
+        this.alpha = Math.random() * 0.6 + 0.4;
     }
+
     update() {
         this.y += this.speed;
-        if (this.y > canvas.height) this.reset();
+        if (this.y > canvas.height) {
+            this.y = -5;
+            this.x = Math.random() * canvas.width;
+        }
 
-        ctx.fillStyle = `rgba(255,255,255,${this.a})`;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${this.alpha})`;
         ctx.fill();
     }
 }
-const stars = Array.from({ length: 220 }, () => new Star());
+
+const stars = [];
+for (let i = 0; i < 220; i++) stars.push(new Star());
 
 /* ================= SAO BĂNG ================= */
 class Meteor {
     constructor() {
         this.reset();
     }
+
     reset() {
-        this.x = -200;
+        this.x = Math.random() * canvas.width * 0.7;
         this.y = Math.random() * canvas.height * 0.3;
-        this.v = 6 + Math.random() * 4;
+        this.vx = 4 + Math.random() * 4;
+        this.vy = 4 + Math.random() * 4;
+        this.len = 120;
     }
+
     update() {
         const hue = (this.x / canvas.width) * 360;
 
-        ctx.save();
-        ctx.strokeStyle = `hsla(${hue},100%,80%,0.9)`;
-        ctx.lineWidth = 2;
-        ctx.shadowColor = `hsl(${hue},100%,80%)`;
-        ctx.shadowBlur = 15;
+        const grad = ctx.createLinearGradient(
+            this.x,
+            this.y,
+            this.x - this.vx * 20,
+            this.y - this.vy * 20
+        );
 
+        grad.addColorStop(0, `hsl(${hue},100%,80%)`);
+        grad.addColorStop(1, "transparent");
+
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(this.x, this.y);
-        ctx.lineTo(this.x - 160, this.y + 55);
+        ctx.lineTo(
+            this.x - this.vx * this.len,
+            this.y - this.vy * this.len
+        );
         ctx.stroke();
-        ctx.restore();
 
-        this.x += this.v;
-        this.y += this.v * 0.45;
+        this.x += this.vx;
+        this.y += this.vy;
 
-        /* chữ đổi màu theo sao băng */
-        if (title) {
-            title.style.color = `hsl(${hue},70%,75%)`;
-            title.style.textShadow = `
-                0 0 20px hsla(${hue},100%,80%,0.6),
-                0 0 45px hsla(${hue},100%,60%,0.4)
-            `;
+        if (this.x > canvas.width || this.y > canvas.height) {
+            this.reset();
         }
 
-        if (this.x > canvas.width + 300) this.reset();
+        updateTextColor(hue);
     }
 }
-const meteors = Array.from({ length: 3 }, () => new Meteor());
 
-/* ================= PHÁO HOA (RÕ HƠN) ================= */
+const meteors = [];
+for (let i = 0; i < 6; i++) meteors.push(new Meteor());
+
+/* ================= CHỮ ĐỔI MÀU THEO SAO BĂNG ================= */
+const text = document.getElementById("newYearText");
+
+function updateTextColor(hue) {
+    if (!text) return;
+
+    text.style.color = `hsl(${hue}, 80%, 75%)`;
+    text.style.textShadow = `
+        0 0 18px hsla(${hue},100%,80%,0.7),
+        0 0 40px hsla(${hue},100%,60%,0.4)
+    `;
+}
+
+/* ================= PHÁO HOA ================= */
 class Firework {
     constructor(x, y) {
         this.particles = [];
-        this.split = false;
-
-        const count = 160; // 🔥 nhiều tia hơn
-        for (let i = 0; i < count; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * 6 + 4;
-
+        for (let i = 0; i < 60; i++) {
+            const a = Math.random() * Math.PI * 2;
+            const s = Math.random() * 4 + 2;
             this.particles.push({
-                x,
-                y,
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
-                life: 140,
-                size: Math.random() * 2.5 + 1.8,
+                x, y,
+                vx: Math.cos(a) * s,
+                vy: Math.sin(a) * s,
+                life: 80,
                 hue: Math.random() * 360
             });
         }
@@ -122,68 +144,42 @@ class Firework {
         this.particles.forEach(p => {
             p.x += p.vx;
             p.y += p.vy;
-            p.vy += 0.025;
+            p.vy += 0.02;
             p.life--;
 
-            ctx.save();
-            ctx.globalAlpha = p.life / 140;
-            ctx.shadowBlur = 25;
-            ctx.shadowColor = `hsl(${p.hue},100%,65%)`;
-            ctx.fillStyle = `hsl(${p.hue},100%,65%)`;
-
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
+            ctx.fillStyle = `hsla(${p.hue},100%,60%,${p.life / 80})`;
+            ctx.fillRect(p.x, p.y, 2.5, 2.5);
         });
-
-        /* nổ tầng 2 cho đã mắt */
-        if (this.particles.length < 40 && !this.split) {
-            this.split = true;
-            this.particles.forEach(p => {
-                for (let i = 0; i < 3; i++) {
-                    this.particles.push({
-                        x: p.x,
-                        y: p.y,
-                        vx: (Math.random() - 0.5) * 3,
-                        vy: (Math.random() - 0.5) * 3,
-                        life: 60,
-                        size: 1.3,
-                        hue: p.hue
-                    });
-                }
-            });
-        }
 
         this.particles = this.particles.filter(p => p.life > 0);
     }
 }
 
 const fireworks = [];
-setInterval(() => {
-    fireworks.push(
-        new Firework(
-            Math.random() * canvas.width,
-            Math.random() * canvas.height * 0.55
-        )
-    );
-}, 1100);
 
 /* ================= LOOP ================= */
-function animate() {
-    ctx.fillStyle = "rgba(3, 2, 15, 0.22)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+function loop() {
     drawSky();
+
     stars.forEach(s => s.update());
     meteors.forEach(m => m.update());
     fireworks.forEach(f => f.update());
 
-    requestAnimationFrame(animate);
+    requestAnimationFrame(loop);
 }
-animate();
+loop();
 
-/* ================= LÌ XÌ ================= */
+/* ================= PHÁO HOA TỰ ĐỘNG ================= */
+setInterval(() => {
+    fireworks.push(
+        new Firework(
+            Math.random() * canvas.width,
+            Math.random() * canvas.height * 0.5
+        )
+    );
+}, 1000);
+
+/* ================= NÚT LÌ XÌ ================= */
 function nhanLiXi() {
     document.getElementById("troll").style.display = "block";
     const music = document.getElementById("bgMusic");
