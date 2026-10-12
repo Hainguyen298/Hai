@@ -1,35 +1,80 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <title>Happy New Year nha ae🎆</title>
-
-    <!-- FONT SANG -->
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BI MAT</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; display:grid; place-items:center; padding:22px;
+    background:radial-gradient(circle at top,#203746,#07121b 65%); color:#e9f3f5;
+    font-family:Consolas,"Courier New",monospace; }
+  main { width:min(680px,100%); padding:clamp(22px,5vw,42px); border:1px solid #496a79;
+    border-radius:16px; background:#071923f2; box-shadow:0 20px 70px #0008; }
+  .tag { color:#75d9c7; font-size:.78rem; letter-spacing:.16em; }
+  h1 { font-size:clamp(1.7rem,5vw,2.5rem); margin:12px 0; }
+  p { line-height:1.65; color:#b7cbd1; }
+  .cipher { margin:24px 0; padding:20px; border-radius:10px; background:#102b37;
+    border:1px dashed #527e8b; text-align:center; }
+  .morse { font-size:clamp(1.4rem,4vw,2rem); color:#f3d98b; letter-spacing:.12em; overflow-wrap:anywhere; }
+  .hint { font-size:.95rem; color:#a8c0c7; margin-top:12px; }
+  label { display:block; margin:18px 0 8px; color:#d1e2e6; }
+  input { width:100%; padding:14px; border:1px solid #527985; border-radius:8px;
+    background:#041017; color:white; font:inherit; font-size:1rem; }
+  button { width:100%; margin-top:12px; padding:14px; border:0; border-radius:8px;
+    background:#75d9c7; color:#062129; font:inherit; font-weight:bold; cursor:pointer; }
+  #feedback { min-height:1.5em; margin-top:14px; color:#ffb3a9; }
+  #secret { display:none; margin-top:22px; padding:20px; border:1px solid #75d9c7;
+    border-radius:10px; background:#102e30; line-height:1.7; }
+  #secret h2 { color:#75d9c7; }
+  .foot { margin-top:26px; color:#7899a2; font-size:.78rem; text-align:center; }
+</style>
 </head>
 <body>
+<main>
+  <div class="tag">GIAI MA QUA 20/10</div>
+  <h1>HỒ SƠ BÍ ẨN</h1>
+  <p>Hồ sơ đang bị khóa. Hãy tìm mật mã dựa trên gợi ý bên dưới. Nhập đúng mã để mở nội dung.</p>
 
-    <!-- CANVAS HIỆU ỨNG -->
-    <canvas id="fireworks"></canvas>
+  <section class="cipher">
+    <div class="tag">GỢI Ý</div>
+    <div class="morse">SAP XEP: I R B T Y A D H (english)</div>
+    <div class="hint">Bốn ký tự này là manh mối</div>
+  </section>
 
-    <!-- NỘI DUNG -->
-    <div class="container">
-        <h1 id="newYearText">🎉 CHÚC MỪNG NĂM MỚI 2026🎉</h1>
-        <h2>🍀Chúc con vợ một năm mới vui vẻ nhiều sức khoẻ và thành công dực dỡ nhaaaa🍀</h2>
-        <button onclick="nhanLiXi()">🎁 Bấm vào đây để nhận lì xì</button>
-        <div id="troll">Dcu lớn đầu dồi nhận lì xì làm gì nữaa vầy<br>đi xem pháo hoa đi còn gì nữa! 😏</div>
-    </div>
+  <form id="unlockForm">
+    <label for="password">Nhập mật mã</label>
+    <input id="password" autocomplete="off" inputmode="numeric" placeholder="••••" required>
+    <button type="submit">MỞ KHÓA HỒ SƠ</button>
+  </form>
+  <div id="feedback" role="status"></div>
 
-    <!-- NHẠC -->
-    <audio id="bgMusic" src="music/tet.mp3" loop></audio>
+  <section id="secret">
+    <h2>HỒ SƠ ĐÃ MỞ</h2>
+    <p><strong>ĐÁP ÁN:</strong> VỎ SÒ STSY</p>
+    <p>Thông điệp: "BAN DA MO KHOA THANH CONG"</p>
+  </section>
+  <div class="foot">HIII<3</div>
+</main>
+<script>
+  const form = document.getElementById('unlockForm');
+  const input = document.getElementById('password');
+  const feedback = document.getElementById('feedback');
+  const secret = document.getElementById('secret');
 
-    <div class="credit">@haitrung</div>
-
-    <script src="script.js"></script>
+  form.addEventListener('submit', function(event) {
+    event.preventDefault();
+    if (input.value.trim() === '3112') {
+      feedback.style.color = '#75d9c7';
+      feedback.textContent = 'Mật mã chính xác. Hồ sơ đã được mở.';
+      secret.style.display = 'block';
+    } else {
+      feedback.style.color = '#ffb3a9';
+      feedback.textContent = 'Mật mã chưa đúng. Hãy thử lại.';
+      secret.style.display = 'none';
+    }
+  });
+</script>
 </body>
 </html>
-
